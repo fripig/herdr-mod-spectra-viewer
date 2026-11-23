@@ -160,10 +160,10 @@ export default class SpectraViewer extends View {
     });
   }
 
-  // The filter box, its placeholder in the interface language (rebuilt, keeping the text, when that changes).
+  // The filter box. Its hint is drawn by render in the interface language: InputState can't change
+  // its placeholder after creation, and a state rebuilt during render isn't picked up.
   makeInput() {
-    this.inputLang = this.lang();
-    this.input = InputState.new({ placeholder: tr(this.inputLang, "filter"), value: this.filter });
+    this.input = InputState.new({ value: this.filter });
     this.input.on("change", (_e, cx) => { this.filter = this.input.value(); cx.notify(); });
   }
 
@@ -348,7 +348,6 @@ export default class SpectraViewer extends View {
 
     const t = theme();
     const lang = this.lang();
-    if (lang !== this.inputLang) this.makeInput();
     const say = (key, params) => tr(lang, key, params);
     const project = this.project;
     const data = this.data;
@@ -386,7 +385,9 @@ export default class SpectraViewer extends View {
         .child(chip("refresh", this.loading ? say("loading") : say("refresh"), (cx) => { if (!this.loading) this.refresh(cx, true); })))
       .child(div().id("filter").h(28).px(8).flex().items_center().rounded(6).border_1().border_color(t.border).bg(t.background).cursor_text()
         .on_mouse_down("left", stop)
-        .child(Input.new(this.input).flex_1().h_full().text_size(12.5).text_color(t.foreground)))
+        .child(div().relative().flex_1().h_full()
+          .when(this.filter === "", (el) => el.child(div().absolute().inset_0().flex().items_center().text_size(12.5).text_color(t.dim).child(say("filter"))))
+          .child(Input.new(this.input).absolute().inset_0().text_size(12.5).text_color(t.foreground))))
       .child(h_flex().gap(4).children(L.SORTS.map((s) =>
         chip(`sort-${s}`, say(sortLabel[s]), (cx) => this.set("sort", "sort", s, cx), { on: this.sort === s, dim: this.sort !== s }))))
       .when(authors.length > 1, (el) => el.child(h_flex().gap(4).flex_wrap()

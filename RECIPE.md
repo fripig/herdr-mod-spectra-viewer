@@ -51,6 +51,7 @@ The document window: 50% × 85% of the Herdr window, keyed `spectra-viewer-doc` 
 ## Built from
 
 - **The layout**, `layouts/spectra-viewer.json`: a copy of `main.json` with every id kept. `panel-body` gains `{ "id": "spectra", "type": "block", "content": { "mod": "spectra-viewer" } }`; the `tabs` block becomes weight 1 inside `{ "id": "tabs-row", "type": "row", "resizable": false, "size": { "px": 42 } }`, followed by `{ "id": "spectra-button", "type": "block", "size": { "px": 98 }, "content": { "mod": "spectra-viewer", "props": { "role": "button" } } }`.
+- **The combined layout**, `layouts/issues-spectra.json`: the same copy of `main` with both buttons in `tabs-row` (`issues-button` 88px with the `issue-launcher` mod, then `spectra-button` 98px) and both `issues` and `spectra` blocks in `panel-body`. `install.sh` installs it only when `mods/issue-launcher/` exists in the herdr-app home.
 - **One mod**, `mods/spectra-viewer/`, three roles by `props().role`: `"button"`, `"viewer"` (`{file, on}`), none = the panel.
   - `mod.json`: `{ "place": "none", "title": "Spectra", "overlay": { "kind": "window", "key": "spectra-viewer", "keep": true, "width": 400, "height": 0.8 } }`.
   - `logic.js`: pure functions (spec dir, YAML scalars, task progress, metadata, `SCAN_SCRIPT` and `parseScan`, sort/filter, key names, target terminal, panel commands).
@@ -69,7 +70,8 @@ The document window: 50% × 85% of the Herdr window, keyed `spectra-viewer-doc` 
 - **No Node APIs:** the `fs/promises` module has no `stat`, and only works locally; the single shell script works the same on remote spaces.
 - **Don't symlink the mod**; copy it (`scripts/install.sh`). `layout()` doesn't report the panel's shown/hidden click, so the button toggles and reads `layouts/.state/<layout>.json` twice a second for its highlight (Herdr's own file: read-only, may change).
 - **Stop mouse-down on every control** (`cx.stop_propagation()`), or pressing it drags the window. Esc doesn't close a window, so ✕ is required.
-- **The layout is a snapshot of `main` from 0.1.16** and holds only this mod's button; Issue launcher's layout is another snapshot with only its own.
+- **The layouts are snapshots of `main` from 0.1.16.** `spectra-viewer` holds only this mod's button; `issues-spectra` holds both, and Issue launcher's own layout only its own.
+- **`InputState` has no way to change its placeholder,** and a state rebuilt inside `render` isn't picked up. The filter box draws its own hint in the interface language behind the input, shown only while the filter is empty.
 - Remote spaces aren't watched; they rely on the 30s timer.
 
 ## Done when

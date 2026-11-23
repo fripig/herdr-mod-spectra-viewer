@@ -51,7 +51,13 @@ Herdr app 0.1.16 的 `main` 加兩處修改：分頁列右側多一個 **Spectra
 - 浮動視窗的 **⇲**：回到右側面板；**✕**：關閉。
 - 不切 layout 也能用：`herdr-app do mod.open --name spectra-viewer` 開浮動視窗。
 
-> 和 issue-launcher 一樣，這份 layout 是 `main` 的複本，兩個 mod 的 layout 各自只有自己的按鈕。想要兩個按鈕並存，要再做一份合併的 layout。
+### issues-spectra layout（和 issue-launcher 一起用）
+
+如果也裝了 [issue-launcher](https://github.com/fripig/herdr-mod-issue-launcher)（`~/.config/herdr-app/mods/issue-launcher/` 存在），`install.sh` 會另外裝 `layouts/issues-spectra.json`：分頁列右側同時有 **Issues** 和 **Spectra** 按鈕，兩個面板都停靠在右側，跟 Files／Changes 共用。沒裝 issue-launcher 時會略過這份 layout 並印出原因。
+
+```sh
+herdr-app do layout.switch --name issues-spectra
+```
 
 ## 開發
 

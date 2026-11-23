@@ -45,6 +45,10 @@ edited() {
   [ "$(sha "$installed_file")" != "$expected" ] && { [ ! -f "$repo/layouts/$name" ] || [ "$(sha "$installed_file")" != "$(sha "$repo/layouts/$name")" ]; }
 }
 
+# Layouts that also show another mod are installed only when that mod is installed.
+needs_mod() { case "$1" in issues-spectra.json) echo issue-launcher ;; esac; }
+usable() { local need; need="$(needs_mod "$1")"; [ -z "$need" ] || [ -d "$home/mods/$need" ]; }
+
 # Check everything before changing anything.
 # Earlier installs: one symlink to the folder, or a folder of symlinks into $src.
 if [ -L "$dest" ] && [ "$(readlink "$dest")" != "$src" ]; then
@@ -67,6 +71,7 @@ fi
 for layout in "$repo"/layouts/*.json; do
   [ -f "$layout" ] || continue
   name="$(basename "$layout")"
+  usable "$name" || continue
   if [ -e "$home/layouts/$name" ] && ! recorded "layout:$name"; then
     echo "refusing: $home/layouts/$name exists and was not installed from $repo" >&2; exit 1
   fi
@@ -103,7 +108,9 @@ for file in "$src"/*; do
   files+=("$name")
 done
 for layout in "$repo"/layouts/*.json; do
-  [ -f "$layout" ] && files+=("layout:$(basename "$layout")")
+  [ -f "$layout" ] || continue
+  if usable "$(basename "$layout")"; then files+=("layout:$(basename "$layout")")
+  else echo "skipping layouts/$(basename "$layout"): needs the $(needs_mod "$(basename "$layout")") mod in $home/mods"; fi
 done
 wanted() { printf '%s\n' "${files[@]}" | grep -qxF "$1"; }
 
