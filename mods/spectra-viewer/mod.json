@@ -1,0 +1,5 @@
+{
+  "place": "none",
+  "title": "Spectra",
+  "overlay": { "kind": "window", "key": "spectra-viewer", "keep": true, "width": 400, "height": 0.8 }
+}
