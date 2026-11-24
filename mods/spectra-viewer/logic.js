@@ -182,10 +182,21 @@ export function parseScan(stdout) {
     }
   }
   flush();
+  // Each file goes to every change folder above it: one pass over the files instead of one per
+  // change, which a project with hundreds of archived changes made too slow for Herdr's engine.
+  const byDir = new Map();
+  for (const file of files) {
+    for (let i = file[0].indexOf("/", 1); i !== -1; i = file[0].indexOf("/", i + 1)) {
+      const dir = file[0].slice(0, i);
+      if (!dirs.has(dir)) continue;
+      if (!byDir.has(dir)) byDir.set(dir, []);
+      byDir.get(dir).push(file);
+    }
+  }
   const out = { active: [], parked: [], archived: [], complete };
   for (const change of dirs.values()) {
     const prefix = change.directory + "/";
-    const mine = files.filter(([p]) => p.startsWith(prefix));
+    const mine = byDir.get(change.directory) ?? [];
     const artifacts = [...new Set(mine.map(([p]) => p.slice(prefix.length)))].sort(compareArtifacts);
     const times = mine.map(([, t]) => t).filter((t) => t !== null);
     const progress = parseTaskProgress(texts.get(prefix + "tasks.md") ?? null);
